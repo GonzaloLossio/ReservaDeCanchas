@@ -1,0 +1,9 @@
+from sqlmodel import SQLModel, Field
+
+class User(SQLModel, table=True):
+    id: int | None  = Field(default=None, primary_key=True)
+    username: str = Field(unique=True)
+    email: str = Field(unique=True)
+    hashed_password: str
+    is_active: bool = True
+    role: str = Field(default="client") 
