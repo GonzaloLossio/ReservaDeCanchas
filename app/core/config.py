@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    app_name: str 
+    app_name: str
     debug: bool = False
     database_url: str 
     secret_key: str

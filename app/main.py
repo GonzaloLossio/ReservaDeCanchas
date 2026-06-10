@@ -4,8 +4,10 @@ from app.database import engine
 from app.models.user import User
 from app.models.court import Court
 from app.models.booking import Booking
+from app.routers.auth import router
 
 app = FastAPI()
+app.include_router(router)
 
 @app.on_event("startup")
 async def on_startup():

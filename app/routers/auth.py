@@ -1,0 +1,50 @@
+from fastapi import APIRouter,Depends,HTTPException
+from app.schemas.user import UserCreate,UserLogin,UserResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import get_db
+from sqlmodel import select
+from app.models.user import User
+from app.core.security import hash_password,verify_password,create_access_token
+
+router = APIRouter()
+
+@router.post('/register',response_model=UserResponse)
+async def register(user: UserCreate, db : AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.username == user.username))
+    existing_user = result.scalars().first()
+    if existing_user: 
+        raise HTTPException(status_code = 400, detail="El usuario ya existe")
+    
+    result = await db.execute(select(User).where(User.email == user.email))
+    existing_email = result.scalars().first()
+    if existing_email:
+        raise HTTPException(status_code=400, detail="El Email ya ha sido registrado")
+    hashed_password = hash_password(user.password)
+    
+    new_user = User(
+        username = user.username,
+        email = user.email,
+        hashed_password = hashed_password
+    )
+
+    db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+
+    return new_user
+
+
+@router.post('/login')
+async def login(user: UserLogin, db : AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.username == user.username))
+    correct_username = result.scalars().first()
+    if not correct_username:
+        raise HTTPException(status_code=400, detail="El usuario no existe")
+    
+    correct_password = verify_password(user.password,correct_username.hashed_password)
+    if not correct_password:
+        raise HTTPException(status_code=400, detail="El password es incorrecto") 
+    
+    access_token = create_access_token(data = {"sub": correct_username.username})
+
+    return {"access_token" : access_token, "token_type": "bearer"}
