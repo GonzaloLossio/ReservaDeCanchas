@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.database import get_db
 from app.models import User
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
@@ -51,3 +52,8 @@ async def get_current_user(token : str = Depends(oauth2_scheme), db : AsyncSessi
         raise HTTPException(status_code=401, detail="Usuario no encontrado")
     
     return valid_user
+
+async def get_admin_user(current_user: User = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+    return current_user
