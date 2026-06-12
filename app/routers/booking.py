@@ -1,11 +1,13 @@
 from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 from app.database import get_db
 from sqlmodel import select
-from app.core.security import get_admin_user,get_current_user
+from app.core.security import get_current_user
 from app.models import Booking, Court
 from app.schemas.booking import BookingCreate, BookingResponse
 from datetime import datetime
+from app.services.booking_services import calculate_price
 
 router = APIRouter()
 
@@ -15,6 +17,8 @@ async def create_booking(booking: BookingCreate, db = Depends(get_db), current_u
     court = result.scalars().first()
     if not court:
         raise HTTPException(status_code=404, detail="Cancha no encontrada")
+    
+    await db.execute(text("SELECT pg_advisory_xact_lock(:court_id)"), {"court_id": booking.court_id})
     
     overlap = await db.execute(
         select(Booking).where(
@@ -30,8 +34,7 @@ async def create_booking(booking: BookingCreate, db = Depends(get_db), current_u
         raise HTTPException(status_code=400, detail="La cancha ya está reservada para ese horario")
     
 
-    hours = (datetime.combine(booking.date, booking.end_time) - datetime.combine(booking.date, booking.start_time)).seconds / 3600 
-    total_price = hours * court.price_per_hour
+    total_price = calculate_price(court.price_per_hour, booking.start_time, booking.end_time, booking.date)
 
     new_booking = Booking(
         user_id = current_user.id,
