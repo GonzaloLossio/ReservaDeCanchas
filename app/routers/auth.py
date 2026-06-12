@@ -1,4 +1,5 @@
 from fastapi import APIRouter,Depends,HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from app.schemas.user import UserCreate,UserLogin,UserResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
@@ -35,13 +36,13 @@ async def register(user: UserCreate, db : AsyncSession = Depends(get_db)):
 
 
 @router.post('/login')
-async def login(user: UserLogin, db : AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.username == user.username))
+async def login(form_data : OAuth2PasswordRequestForm = Depends(), db : AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.username == form_data.username))
     correct_username = result.scalars().first()
     if not correct_username:
         raise HTTPException(status_code=400, detail="El usuario no existe")
     
-    correct_password = verify_password(user.password,correct_username.hashed_password)
+    correct_password = verify_password(form_data.password,correct_username.hashed_password)
     if not correct_password:
         raise HTTPException(status_code=400, detail="El password es incorrecto") 
     
