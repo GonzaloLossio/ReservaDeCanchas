@@ -9,9 +9,9 @@ from app.routers.courts import router as courts_router
 from app.routers.booking import router as booking_router
 
 app = FastAPI()
-app.include_router(auth_router)
-app.include_router(courts_router)
-app.include_router(booking_router)
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(courts_router, prefix="/courts", tags=["courts"])
+app.include_router(booking_router, prefix="/bookings", tags=["bookings"])
 
 @app.on_event("startup")
 async def on_startup():
