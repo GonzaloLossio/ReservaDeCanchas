@@ -9,7 +9,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 def hash_password(password: str) -> str:
@@ -54,6 +54,6 @@ async def get_current_user(token : str = Depends(oauth2_scheme), db : AsyncSessi
     return valid_user
 
 async def get_admin_user(current_user: User = Depends(get_current_user)):
-    if not current_user.role:
-        raise HTTPException(status_code=403, detail="Acceso denegado")
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Acceso denegado a clientes")
     return current_user
