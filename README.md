@@ -16,7 +16,7 @@ El objetivo principal de este proyecto no era solo hacer un CRUD de usuarios y c
 
 * **Autenticación y Roles:** Sistema de login basado en JSON Web Tokens (JWT). Existen roles de usuario (cliente y administrador) que limitan qué endpoints se pueden consumir.
 * **Gestión de sedes y canchas:** Los administradores pueden dar de alta canchas, definir qué deporte se juega en ellas y establecer su precio base por hora.
-* **Lógica de reservas (Core del proyecto):** * El sistema rechaza automáticamente cualquier reserva cuyo rango de horas se solape con una reserva ya existente para esa misma cancha y fecha.
+* **Lógica de reservas (Core del proyecto):** El sistema rechaza automáticamente cualquier reserva cuyo rango de horas se solape con una reserva ya existente para esa misma cancha y fecha.
   * Cálculos de precios dinámicos dependiendo del día (fines de semana) y el horario.
 * **Control de concurrencia:** Implementé bloqueos transaccionales a nivel de base de datos (`pg_advisory_xact_lock` en PostgreSQL) para evitar condiciones de carrera (Race Conditions). Si dos usuarios intentan tomar el mismo turno al mismo exacto milisegundo, la base de datos evita que se duplique la reserva.
 * **Reglas de cancelación:** Bloqueo de cancelaciones si el usuario intenta cancelar con menos de 2 horas de anticipación.
