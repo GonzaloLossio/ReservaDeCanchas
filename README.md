@@ -1,6 +1,6 @@
 # API de Reservas de Canchas Deportivas
 
-Este es el backend para un sistema de reservas de canchas deportivas (fútbol, tenis, pádel). Está construido con FastAPI y PostgreSQL. 
+Este es el backend para un sistema de reservas de canchas deportivas (fútbol, tenis, basket, etc). Está construido con FastAPI y PostgreSQL. 
 
 El objetivo principal de este proyecto no era solo hacer un CRUD de usuarios y canchas, sino enfrentarme a la lógica de negocio y problemas de concurrencia reales que ocurren cuando se manejan horarios y reservas.
 
